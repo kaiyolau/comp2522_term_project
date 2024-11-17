@@ -1,24 +1,27 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
- * Main class for the Word Game implementation.
+ * Implementation of the Word Game that tests geography knowledge
  */
 public class WordGame {
-    private World world;
+    private HashMap<String, Country> countries;
     private List<Score> scores;
     private Scanner scanner;
     private Random random;
+    private int gamesPlayed;
+    private int totalCorrectFirstAttempt;
+    private int totalCorrectSecondAttempt;
+    private int totalIncorrectAttempts;
+    private static final String SCORE_FILE = "score.txt";
 
     /**
-     * Constructs a new WordGame object.
+     * Constructs a new WordGame instance
      */
     public WordGame() {
-        world = new World();
+        countries = new HashMap<>();
         scores = new ArrayList<>();
         scanner = new Scanner(System.in);
         random = new Random();
@@ -26,113 +29,212 @@ public class WordGame {
         loadScores();
     }
 
+
     /**
-     * Loads country data from files.
+     * Starts and manages the game session
      */
-    private void loadCountryData() {
-        // Implementation to read from a.txt through z.txt files
-        // This would need to be implemented based on the file format
+    public void playGame() {
+        boolean playAgain = true;
+        while (playAgain) {
+            playSingleGame();
+            playAgain = askToPlayAgain();
+        }
     }
 
     /**
-     * Loads previous scores from score.txt.
+     * Plays a single game of 10 questions
+     */
+    private void playSingleGame() {
+        int correctFirstAttempt = 0;
+        int correctSecondAttempt = 0;
+        int incorrectAttempts = 0;
+
+        System.out.println("\nStarting new game - 10 questions about world geography!");
+
+        for (int i = 1; i <= 10; i++) {
+            System.out.println("\nQuestion " + i + ":");
+            int questionType = random.nextInt(3);
+            boolean firstTry = askQuestion(questionType);
+
+            if (firstTry) {
+                System.out.println("CORRECT on first attempt!");
+                correctFirstAttempt++;
+            } else {
+                System.out.println("Incorrect. Try one more time!");
+                boolean secondTry = askQuestion(questionType);
+                if (secondTry) {
+                    System.out.println("CORRECT on second attempt!");
+                    correctSecondAttempt++;
+                } else {
+                    System.out.println("Incorrect again. Better luck next time!");
+                    incorrectAttempts++;
+                }
+            }
+        }
+
+        // Update totals
+        gamesPlayed++;
+        totalCorrectFirstAttempt += correctFirstAttempt;
+        totalCorrectSecondAttempt += correctSecondAttempt;
+        totalIncorrectAttempts += incorrectAttempts;
+
+        // Display results
+        displayGameResults();
+
+        // Save score
+        Score currentScore = new Score(
+                LocalDateTime.now(),
+                gamesPlayed,
+                totalCorrectFirstAttempt,
+                totalCorrectSecondAttempt,
+                totalIncorrectAttempts
+        );
+        saveScore(currentScore);
+        checkHighScore(currentScore);
+    }
+
+    /**
+     * Loads country data from provided text files
+     */
+    private void loadCountryData() {
+        // For testing purposes, adding some sample data
+        String[] canadaFacts = {
+                "Home to the longest coastline in the world.",
+                "Famous for its maple syrup production, accounting for 71% of the world's supply.",
+                "One of the most multicultural nations in the world."
+        };
+        countries.put("Canada", new Country("Canada", "Ottawa", canadaFacts));
+
+        String[] franceFacts = {
+                "Home to the Eiffel Tower.",
+                "Known for its fine wines and cheeses.",
+                "Has the most visited museum in the world - the Louvre."
+        };
+        countries.put("France", new Country("France", "Paris", franceFacts));
+    }
+
+    /**
+     * Asks a single question based on the question type
+     * @param questionType Type of question (0-2)
+     * @return true if answered correctly, false otherwise
+     */
+    private boolean askQuestion(int questionType) {
+        List<Country> countryList = new ArrayList<>(countries.values());
+        Country randomCountry = countryList.get(random.nextInt(countryList.size()));
+        String correctAnswer;
+
+        switch (questionType) {
+            case 0: // Capital city question
+                System.out.println("What country has " + randomCountry.getCapitalCityName() + " as its capital?");
+                correctAnswer = randomCountry.getName();
+                break;
+
+            case 1: // Country question
+                System.out.println("What is the capital city of " + randomCountry.getName() + "?");
+                correctAnswer = randomCountry.getCapitalCityName();
+                break;
+
+            default: // Fact question
+                String[] facts = randomCountry.getFacts();
+                String randomFact = facts[random.nextInt(facts.length)];
+                System.out.println("Which country is this fact about? " + randomFact);
+                correctAnswer = randomCountry.getName();
+                break;
+        }
+
+        System.out.print("Your answer: ");
+        String userAnswer = scanner.nextLine().trim();
+
+        return userAnswer.equalsIgnoreCase(correctAnswer);
+    }
+
+    /**
+     * Asks if the player wants to play again
+     * @return true if player wants to play again, false otherwise
+     */
+    private boolean askToPlayAgain() {
+        while (true) {
+            System.out.print("\nWould you like to play again? (Yes/No): ");
+            String response = scanner.nextLine().trim().toLowerCase();
+            if (response.equals("yes")) {
+                return true;
+            } else if (response.equals("no")) {
+                return false;
+            }
+            System.out.println("Please enter either 'Yes' or 'No'");
+        }
+    }
+
+    /**
+     * Displays the results of the current game session
+     */
+    private void displayGameResults() {
+        System.out.println("\nGame Results:");
+        System.out.println("- " + gamesPlayed + " word game" + (gamesPlayed != 1 ? "s" : "") + " played");
+        System.out.println("- " + totalCorrectFirstAttempt + " correct answers on the first attempt");
+        System.out.println("- " + totalCorrectSecondAttempt + " correct answers on the second attempt");
+        System.out.println("- " + totalIncorrectAttempts + " incorrect answers on two attempts each");
+    }
+
+    /**
+     * Loads previous scores from the score.txt file
      */
     private void loadScores() {
-        try {
-            File file = new File("score.txt");
-            if (!file.exists()) {
-                return;
+        File file = new File(SCORE_FILE);
+        if (!file.exists()) {
+            return;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length == 5) {
+                    LocalDateTime dateTime = LocalDateTime.parse(parts[0],
+                            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                    Score score = new Score(
+                            dateTime,
+                            Integer.parseInt(parts[1]),
+                            Integer.parseInt(parts[2]),
+                            Integer.parseInt(parts[3]),
+                            Integer.parseInt(parts[4])
+                    );
+                    scores.add(score);
+                }
             }
-            Scanner fileScanner = new Scanner(file);
-            while (fileScanner.hasNextLine()) {
-                // Parse the score file format and create Score objects
-                // Implementation needed based on the specific file format
-            }
-            fileScanner.close();
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             System.out.println("Error loading scores: " + e.getMessage());
         }
     }
 
     /**
-     * Plays one round of the game.
-     * @return true if the player wants to play again, false otherwise
-     */
-    public boolean playGame() {
-        int firstAttempts = 0;
-        int secondAttempts = 0;
-        int incorrect = 0;
-
-        for (int i = 0; i < 10; i++) {
-            int questionType = random.nextInt(3);
-            boolean result = askQuestion(questionType);
-            if (result) {
-                firstAttempts++;
-            } else {
-                result = askQuestion(questionType); // Second attempt
-                if (result) {
-                    secondAttempts++;
-                } else {
-                    incorrect++;
-                }
-            }
-        }
-
-        // Save score and check for high score
-        Score currentScore = new Score(
-                LocalDateTime.now(),
-                1,
-                firstAttempts,
-                secondAttempts,
-                incorrect
-        );
-        scores.add(currentScore);
-        saveScore(currentScore);
-        checkHighScore(currentScore);
-
-        return askToPlayAgain();
-    }
-
-    /**
-     * Asks a question based on the question type.
-     * @param questionType The type of question (0-2)
-     * @return true if answered correctly, false otherwise
-     */
-    private boolean askQuestion(int questionType) {
-        // Implementation for different question types
-        // Returns true if answer is correct, false otherwise
-        return false; // Placeholder
-    }
-
-    /**
-     * Saves the score to the score.txt file.
+     * Saves the current score to the score.txt file
      * @param score The score to save
      */
     private void saveScore(Score score) {
-        try {
-            FileWriter writer = new FileWriter("score.txt", true);
+        try (FileWriter writer = new FileWriter(SCORE_FILE, true)) {
+            // Format: datetime,gamesPlayed,correctFirst,correctSecond,incorrect
             writer.write(String.format("%s,%d,%d,%d,%d\n",
                     score.getFormattedDateTime(),
                     score.getNumGamesPlayed(),
                     score.getNumCorrectFirstAttempt(),
                     score.getNumCorrectSecondAttempt(),
                     score.getNumIncorrectTwoAttempts()));
-            writer.close();
         } catch (IOException e) {
             System.out.println("Error saving score: " + e.getMessage());
         }
     }
 
     /**
-     * Checks if the current score is a new high score.
+     * Checks if the current score is a new high score
      * @param currentScore The current score to check
      */
     private void checkHighScore(Score currentScore) {
-        double currentAverage = currentScore.calculateAverageScore();
         Score highScore = getHighScore();
+        double currentAverage = currentScore.calculateAverageScore();
 
         if (highScore == null || currentAverage > highScore.calculateAverageScore()) {
-            System.out.printf("CONGRATULATIONS! You are the new high score with an average of %.2f points per game",
+            System.out.printf("\nCONGRATULATIONS! You are the new high score with an average of %.2f points per game",
                     currentAverage);
             if (highScore != null) {
                 System.out.printf("; the previous record was %.2f points per game on %s",
@@ -141,14 +243,14 @@ public class WordGame {
             }
             System.out.println();
         } else {
-            System.out.printf("You did not beat the high score of %.2f points per game from %s\n",
+            System.out.printf("\nYou did not beat the high score of %.2f points per game from %s\n",
                     highScore.calculateAverageScore(),
                     highScore.getFormattedDateTime());
         }
     }
 
     /**
-     * Gets the highest score from the scores list.
+     * Gets the highest score from the scores list
      * @return The highest Score object, or null if no scores exist
      */
     private Score getHighScore() {
@@ -159,20 +261,42 @@ public class WordGame {
                 (a, b) -> Double.compare(a.calculateAverageScore(), b.calculateAverageScore()));
     }
 
+    // ... (Score class definition) ...
     /**
-     * Asks the user if they want to play again.
-     * @return true if the user wants to play again, false otherwise
+     * Inner class to represent a game score
      */
-    private boolean askToPlayAgain() {
-        while (true) {
-            System.out.println("Would you like to play again? (Yes/No)");
-            String response = scanner.nextLine().trim().toLowerCase();
-            if (response.equals("yes")) {
-                return true;
-            } else if (response.equals("no")) {
-                return false;
-            }
-            System.out.println("Please enter either 'Yes' or 'No'");
+    private static class Score {
+        private LocalDateTime dateTimePlayed;
+        private int numGamesPlayed;
+        private int numCorrectFirstAttempt;
+        private int numCorrectSecondAttempt;
+        private int numIncorrectTwoAttempts;
+
+        public Score(LocalDateTime dateTimePlayed, int numGamesPlayed,
+                     int numCorrectFirstAttempt, int numCorrectSecondAttempt,
+                     int numIncorrectTwoAttempts) {
+            this.dateTimePlayed = dateTimePlayed;
+            this.numGamesPlayed = numGamesPlayed;
+            this.numCorrectFirstAttempt = numCorrectFirstAttempt;
+            this.numCorrectSecondAttempt = numCorrectSecondAttempt;
+            this.numIncorrectTwoAttempts = numIncorrectTwoAttempts;
         }
+
+        public double calculateAverageScore() {
+            int totalPoints = (numCorrectFirstAttempt * 2) + numCorrectSecondAttempt;
+            return (double) totalPoints / numGamesPlayed;
+        }
+
+        public String getFormattedDateTime() {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            return dateTimePlayed.format(formatter);
+        }
+
+        // Getters
+        public LocalDateTime getDateTimePlayed() { return dateTimePlayed; }
+        public int getNumGamesPlayed() { return numGamesPlayed; }
+        public int getNumCorrectFirstAttempt() { return numCorrectFirstAttempt; }
+        public int getNumCorrectSecondAttempt() { return numCorrectSecondAttempt; }
+        public int getNumIncorrectTwoAttempts() { return numIncorrectTwoAttempts; }
     }
 }
