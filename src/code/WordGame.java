@@ -2,6 +2,7 @@ import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+//import
 
 /**
  * Implementation of the Word Game that tests geography knowledge
@@ -25,7 +26,10 @@ public class WordGame {
         scores = new ArrayList<>();
         scanner = new Scanner(System.in);
         random = new Random();
-        loadCountryData();
+        if (!loadCountryData()) {
+            System.out.println("Error: Unable to start game due to missing country data.");
+            System.exit(1);  // Exit if no data is loaded
+        }
         loadScores();
     }
 
@@ -45,6 +49,11 @@ public class WordGame {
      * Plays a single game of 10 questions
      */
     private void playSingleGame() {
+        if (countries.isEmpty()) {
+            System.out.println("Error: Cannot play game without country data.");
+            return;
+        }
+
         int correctFirstAttempt = 0;
         int correctSecondAttempt = 0;
         int incorrectAttempts = 0;
@@ -95,23 +104,93 @@ public class WordGame {
 
     /**
      * Loads country data from provided text files
+     * @return true if data was loaded successfully, false otherwise
      */
-    private void loadCountryData() {
-        // For testing purposes, adding some sample data
-        String[] canadaFacts = {
-                "Home to the longest coastline in the world.",
-                "Famous for its maple syrup production, accounting for 71% of the world's supply.",
-                "One of the most multicultural nations in the world."
-        };
-        countries.put("Canada", new Country("Canada", "Ottawa", canadaFacts));
+    private boolean loadCountryData() {
+        boolean dataLoaded = false;
 
-        String[] franceFacts = {
-                "Home to the Eiffel Tower.",
-                "Known for its fine wines and cheeses.",
-                "Has the most visited museum in the world - the Louvre."
-        };
-        countries.put("France", new Country("France", "Paris", franceFacts));
+        // Print current working directory for debugging
+//        System.out.println("Current working directory: " + System.getProperty("user.dir"));
+
+        // Iterate through a.txt to z.txt files`
+        for (char letter = 'a'; letter <= 'z'; letter++) {
+            String filename = letter + ".txt";
+            File file = new File(filename);
+
+            // Debug output for each file
+//            System.out.println("Checking for file: " + file.getAbsolutePath());
+
+            if (!file.exists()) {
+//                System.out.println("File not found: " + filename);
+                continue; // Skip if file doesn't exist
+            }
+
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+//                System.out.println("Reading from file: " + filename);
+                String line;
+                String currentCountry = null;
+                List<String> factsList = new ArrayList<>();
+
+                while ((line = reader.readLine()) != null) {
+                    line = line.trim();
+                    if (line.isEmpty()) {
+                        // Process previous country if we have one
+                        if (currentCountry != null && !factsList.isEmpty()) {
+                            String[] parts = currentCountry.split(":");
+                            if (parts.length == 2) {
+                                String countryName = parts[0].trim();
+                                String capitalCity = parts[1].trim();
+                                String[] facts = factsList.toArray(new String[0]);
+                                countries.put(countryName, new Country(countryName, capitalCity, facts));
+                                dataLoaded = true;
+//                                System.out.println("Added country: " + countryName);
+                            }
+                        }
+                        // Reset for next country`
+                        currentCountry = null;
+                        factsList.clear();
+                        continue;
+                    }
+
+                    if (currentCountry == null) {
+                        // This should be a country:capital line
+                        if (line.contains(":")) {
+                            currentCountry = line;
+                        }
+                    } else {
+                        // This is a fact
+                        factsList.add(line);
+                    }
+                }
+
+                // Process the last country in the file
+                if (currentCountry != null && !factsList.isEmpty()) {
+                    String[] parts = currentCountry.split(":");
+                    if (parts.length == 2) {
+                        String countryName = parts[0].trim();
+                        String capitalCity = parts[1].trim();
+                        String[] facts = factsList.toArray(new String[0]);
+                        countries.put(countryName, new Country(countryName, capitalCity, facts));
+                        dataLoaded = true;
+//                        System.out.println("Added country: " + countryName);
+                    }
+                }
+
+            } catch (IOException e) {
+                System.out.println("Error reading file " + filename + ": " + e.getMessage());
+            }
+        }
+
+        if (!dataLoaded) {
+            System.out.println("ERROR: No country data could be loaded. Please ensure at least one valid input file is present.");
+            System.out.println("Make sure your text files are in: " + System.getProperty("user.dir"));
+            return false;
+        }
+
+        System.out.println("Successfully loaded " + countries.size() + " countries.");
+        return true;
     }
+
 
     /**
      * Asks a single question based on the question type
@@ -119,6 +198,10 @@ public class WordGame {
      * @return true if answered correctly, false otherwise
      */
     private boolean askQuestion(int questionType) {
+        if (countries.isEmpty()) {
+            throw new IllegalStateException("No country data available for questions");
+        }
+
         List<Country> countryList = new ArrayList<>(countries.values());
         Country randomCountry = countryList.get(random.nextInt(countryList.size()));
         String correctAnswer;
@@ -261,7 +344,7 @@ public class WordGame {
                 (a, b) -> Double.compare(a.calculateAverageScore(), b.calculateAverageScore()));
     }
 
-    // ... (Score class definition) ...
+
     /**
      * Inner class to represent a game score
      */

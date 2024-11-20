@@ -48,9 +48,19 @@ class Score {
     }
 
     // Getters
-    public LocalDateTime getDateTimePlayed() { return dateTimePlayed; }
-    public int getNumGamesPlayed() { return numGamesPlayed; }
-    public int getNumCorrectFirstAttempt() { return numCorrectFirstAttempt; }
-    public int getNumCorrectSecondAttempt() { return numCorrectSecondAttempt; }
-    public int getNumIncorrectTwoAttempts() { return numIncorrectTwoAttempts; }
+    public LocalDateTime getDateTimePlayed() {
+        return dateTimePlayed;
+    }
+    public int getNumGamesPlayed() {
+        return numGamesPlayed;
+    }
+    public int getNumCorrectFirstAttempt() {
+        return numCorrectFirstAttempt;
+    }
+    public int getNumCorrectSecondAttempt() {
+        return numCorrectSecondAttempt;
+    }
+    public int getNumIncorrectTwoAttempts() {
+        return numIncorrectTwoAttempts;
+    }
 }
