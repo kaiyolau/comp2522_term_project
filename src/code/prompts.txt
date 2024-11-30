@@ -1,0 +1,72 @@
+Best prompts + Explaination:
+
+Prompt:
+I want to develop a program using Java that takes input.txt, transpose the chord progression based on user's reqiurement. for example
+terminal command line:
+input.txt D
+
+This will take the file input.txt, and transpose the chord progression into D major key. here are the example of input.txt:
+
+C key
+[Verse 1]
+
+            C              G/B          Am
+For all the times that you rain on my parade
+            Dm               C        G/B
+And all the clubs you get in using my name
+              C                  G/B         Am
+You think you broke my heart, oh girl for goodness sake
+              Dm            C           G/B
+You think I'm crying, on my own, well I ain't
+                   C           G/B                  Am
+And I didn't wanna write a song cause I didn't want anyone thinking I still care
+
+Pseudo code:
+I'm gonna write down some pseudo code for the logic of the program.
+
+1, identified which line from the input file is the chord progression, so setting two statements to identify if the current line is chord progression. First, if the line contains more than five white space, and if the line contains the uppercase characters from the range of A to G. or Secondly, if the line contains "/" or "#" characters.
+
+2, encode all chord signature across all keys in music(totally 12 keys) into different array
+ex: String[] C_key = { "C", "Dm", "Em", "F", "G", "Am", "Bdim" }
+ex: String[] D_key = { "D", "Em", "F#m", "G", "A", "Bm", "C#dim" }
+
+3, identify the key from the input file. if the line contains the keyword ignoreCase "key", then take the uppercase character before the "key" or after it. for example from the input.txt file, we got "C key", then store the C key as the original key for this file.
+
+4, compare the line of chord progression, ex: if we got a line which is
+"            C              G/B          Am", and user ask for transpose to D key, then first pare the content of the line, then get the index of each each uppercase character( it means chords in music) from the C_key array. it should get the index 0 for "C" character. Then, it will use swich-case statement to list out what key should be transposed. if it needs to transpose to D key, then it will looks for the index 0 in D_key array, which is "D". so from the original character "C" will modify to "D" instead.
+
+5, after transpose all lines of chord progression, store the new file into a new txt file, called output.txt
+
+Explaination:
+
+This prompt contain the higher goal that the program need to achieve. and also give a detail sudo code for the program to write the logic line by line.
+Plus, I also provided the format of the input file, a piece of content from the input file as well, so when it comes to writing a logic for me,
+It will less likely make a logically misatake. Give a higher goal for the program, make sure the AI follows the alignment of the goal.
+
+
+
+
+
+
+
+
+
+The worst prompt:
+
+Prompt:
+
+after reformat the saveScore(), the program can't look for the highest score in the past anymore, should we change this method to adjust?
+       private Score getHighScore() {
+           if (scores.isEmpty()) {
+               return null;
+           }
+           return Collections.max(scores,
+                   (a, b) -> Double.compare(a.calculateAverageScore(), b.calculateAverageScore()));
+       }
+
+
+Explaination:
+This prompt is one of the worst prompt. it happened after I reivise the logic for storing the score information in the WordGame.
+First, because I only provided a piece of the code to the AI, so it doesn't know which method should it revise in order to also
+changing the logic for retrieving the highest score from the score list. Also, it end up omit loadingScore method as well,
+causing it would sucessfully get the highest score from the list.

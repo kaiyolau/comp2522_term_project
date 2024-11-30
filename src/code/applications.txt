@@ -1,0 +1,12 @@
+Lesson 1:  STRINGBUILDER: In ChordLine class (processedLine field)
+Lesson 2:  @override: In ChordLine class (compareTo, equals, hashCode methods)
+Lesson 3: equals() method: In ChordLine class
+Lesson 4: Comparable compareTo(): ChordLine class implements Comparable
+Lesson 5: ArrayList + Iterator: In Main class for storing lines
+Lesson 6: Nested classes: ChordLine is nested within ChordProgressionHandler
+Lesson 7: Method reference: In Main class with sorted(ChordProgressionHandler.ChordLine::compareTo)
+Lesson 8: Collection stream(): Used in transposeChord method and line processing
+Lesson 9: UI not available: Program uses command-line interface
+Lesson 10: Unit testing: Implemented in ChordTransposerTest class
+Lesson 11: Design pattern: Singleton pattern used for ChordProgressionHandler class
+Lesson 12: Concurrent: parallelStream() used for processContent method

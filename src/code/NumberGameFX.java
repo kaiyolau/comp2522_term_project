@@ -35,13 +35,16 @@ public class NumberGameFX extends Application {
         GridPane gridPane = new GridPane();
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COLS; col++) {
+                final int currentRow = row; // Declare new final variable
+                final int currentCol = col; // Declare new final variable
                 Button button = new Button();
                 button.setPrefSize(60, 60);
-                button.setOnAction(e -> handleCellClick(row, col, button));
+                button.setOnAction(e -> handleCellClick(currentRow, currentCol, button));
                 buttons[row][col] = button;
                 gridPane.add(button, col, row);
             }
         }
+
 
         // Start Game Button
         Button startGameButton = new Button("Start Game");

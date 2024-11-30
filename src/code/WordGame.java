@@ -284,19 +284,33 @@ public class WordGame {
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
+            LocalDateTime dateTimePlayed = null;
+            int gamesPlayed = 0;
+            int correctFirstAttempt = 0;
+            int correctSecondAttempt = 0;
+            int incorrectAttempts = 0;
+
             while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length == 5) {
-                    LocalDateTime dateTime = LocalDateTime.parse(parts[0],
-                            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                    Score score = new Score(
-                            dateTime,
-                            Integer.parseInt(parts[1]),
-                            Integer.parseInt(parts[2]),
-                            Integer.parseInt(parts[3]),
-                            Integer.parseInt(parts[4])
-                    );
-                    scores.add(score);
+                line = line.trim();
+
+                if (line.startsWith("Date and Time:")) {
+                    // Parse the date and time
+                    String dateTimeString = line.substring("Date and Time:".length()).trim();
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                    dateTimePlayed = LocalDateTime.parse(dateTimeString, formatter);
+                } else if (line.startsWith("Games Played:")) {
+                    gamesPlayed = Integer.parseInt(line.substring("Games Played:".length()).trim());
+                } else if (line.startsWith("Correct First Attempts:")) {
+                    correctFirstAttempt = Integer.parseInt(line.substring("Correct First Attempts:".length()).trim());
+                } else if (line.startsWith("Correct Second Attempts:")) {
+                    correctSecondAttempt = Integer.parseInt(line.substring("Correct Second Attempts:".length()).trim());
+                } else if (line.startsWith("Incorrect Attempts:")) {
+                    incorrectAttempts = Integer.parseInt(line.substring("Incorrect Attempts:".length()).trim());
+                } else if (line.startsWith("Total Score:")) {
+                    // End of one entry, create a new Score object
+                    if (dateTimePlayed != null) {
+                        scores.add(new Score(dateTimePlayed, gamesPlayed, correctFirstAttempt, correctSecondAttempt, incorrectAttempts));
+                    }
                 }
             }
         } catch (IOException e) {
@@ -308,19 +322,32 @@ public class WordGame {
      * Saves the current score to the score.txt file
      * @param score The score to save
      */
+    /**
+     * Saves the current score to the score.txt file in the required format
+     * @param score The score to save
+     */
     private void saveScore(Score score) {
         try (FileWriter writer = new FileWriter(SCORE_FILE, true)) {
-            // Format: datetime,gamesPlayed,correctFirst,correctSecond,incorrect
-            writer.write(String.format("%s,%d,%d,%d,%d\n",
-                    score.getFormattedDateTime(),
-                    score.getNumGamesPlayed(),
-                    score.getNumCorrectFirstAttempt(),
-                    score.getNumCorrectSecondAttempt(),
-                    score.getNumIncorrectTwoAttempts()));
+            // Capture the current DateTime
+            final LocalDateTime currentTime = LocalDateTime.now();
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            final String formattedDateTime = currentTime.format(formatter);
+
+            // Write formatted output to file
+            writer.write("Date and Time: " + formattedDateTime + "\n");
+            writer.write("Games Played: " + score.getNumGamesPlayed() + "\n");
+            writer.write("Correct First Attempts: " + score.getNumCorrectFirstAttempt() + "\n");
+            writer.write("Correct Second Attempts: " + score.getNumCorrectSecondAttempt() + "\n");
+            writer.write("Incorrect Attempts: " + score.getNumIncorrectTwoAttempts() + "\n");
+
+            int totalPoints = (score.getNumCorrectFirstAttempt() * 2) + score.getNumCorrectSecondAttempt();
+            writer.write("Total Score: " + totalPoints + " points\n");
+            writer.write("\n"); // Add a blank line between entries
         } catch (IOException e) {
             System.out.println("Error saving score: " + e.getMessage());
         }
     }
+
 
     /**
      * Checks if the current score is a new high score

@@ -37,8 +37,7 @@ public class Main {
 
                     case 'N':
                         System.out.println("\nStarting Number Game...");
-                        NumberGame numberGame = new NumberGame(false);
-                        numberGame.playGame();
+                        NumberGameFX.main(new String[]{}); // Launch the JavaFX-based Number Game
                         System.out.println("Number Game finished.\n");
                         break;
 
