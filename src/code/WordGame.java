@@ -2,10 +2,12 @@ import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-//import
+
 
 /**
  * Implementation of the Word Game that tests geography knowledge
+ * @author Kyle Lau
+ * @version 1.0
  */
 public class WordGame {
     private HashMap<String, Country> countries;
@@ -133,6 +135,8 @@ public class WordGame {
 
                 while ((line = reader.readLine()) != null) {
                     line = line.trim();
+
+                    //check if the line is empty, that means we encounter a new coutry information, look at the txt format
                     if (line.isEmpty()) {
                         // Process previous country if we have one
                         if (currentCountry != null && !factsList.isEmpty()) {
@@ -257,7 +261,17 @@ public class WordGame {
         System.out.println("- " + totalCorrectFirstAttempt + " correct answers on the first attempt");
         System.out.println("- " + totalCorrectSecondAttempt + " correct answers on the second attempt");
         System.out.println("- " + totalIncorrectAttempts + " incorrect answers on two attempts each");
+
+        // Calculate total points
+        int totalPoints = (totalCorrectFirstAttempt * 2) + totalCorrectSecondAttempt;
+        double averageScore = (double) totalPoints / gamesPlayed;
+
+        // Display total points and average score
+        System.out.println("Total is " + totalPoints + " points in " + gamesPlayed +
+                " game" + (gamesPlayed != 1 ? "s" : "") +
+                ", for an average score of " + String.format("%.2f", averageScore) + " points per game.");
     }
+
 
     /**
      * Loads previous scores from the score.txt file

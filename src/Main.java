@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.Scanner;
 
 /**
@@ -41,9 +42,14 @@ public class Main {
                         break;
 
                     case 'M':
-                        System.out.println("\nStarting Custom Game...");
-                        // customGame.playGame();
-                        System.out.println("Custom Game finished.\n");
+                        System.out.println("\nStarting Chord Progression Transposition...");
+                        try {
+                            ChordProgressionHandler.getInstance().startTransposition();
+                        } catch (IOException e) {
+                            System.out.println("An error occurred during chord progression initialization: " + e.getMessage());
+                        }
+
+                        System.out.println("Transposition finished.\n");
                         break;
 
                     case 'Q':
