@@ -31,13 +31,14 @@ public class Main {
                     case 'W':
                         System.out.println("\nStarting Word Game...");
                         WordGame wordGame = new WordGame();
-                         wordGame.playGame();
+                        wordGame.playGame();
                         System.out.println("Word Game finished.\n");
                         break;
 
                     case 'N':
                         System.out.println("\nStarting Number Game...");
-                        // numberGame.playGame();
+                        NumberGame numberGame = new NumberGame(false);
+                        numberGame.playGame();
                         System.out.println("Number Game finished.\n");
                         break;
 

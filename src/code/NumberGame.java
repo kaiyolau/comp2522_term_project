@@ -15,14 +15,66 @@ public class NumberGame extends AbstractNumberGame {
         super();
         this.guiMode = isGuiMode;
 
-        if (isGuiMode) {
-            initializeGUI();
-        }
+        // Call the abstract startGame method
+        startGame();
     }
 
     // Default constructor (GUI mode)
     public NumberGame() {
         this(true);
+    }
+
+    @Override
+    public void startGame() {
+        if (guiMode) {
+            // If in GUI mode, initialize the GUI
+            initializeGUI();
+        } else {
+            // If in console mode, prepare for console play
+            resetGrid();
+            currentNumber = generateNextNumber();
+        }
+    }
+
+    private boolean isGameComplete() {
+        // Check if all cells are filled and in ascending order
+        for (int row = 0; row < grid.length; row++) {
+            int lastNumber = 0;
+            for (int col = 0; col < grid[row].length; col++) {
+                // Check if current cell is empty
+                if (grid[row][col] == 0) {
+                    return false;
+                }
+
+                // Check if numbers are in ascending order
+                if (grid[row][col] < lastNumber) {
+                    return false;
+                }
+
+                lastNumber = grid[row][col];
+            }
+        }
+
+        // Additional check to ensure numbers are truly in ascending order across rows
+        int previousRowLastNumber = 0;
+        for (int row = 0; row < grid.length; row++) {
+            if (grid[row][0] < previousRowLastNumber) {
+                return false;
+            }
+
+            // Find the last non-zero number in this row
+            int lastNonZeroInRow = 0;
+            for (int col = grid[row].length - 1; col >= 0; col--) {
+                if (grid[row][col] != 0) {
+                    lastNonZeroInRow = grid[row][col];
+                    break;
+                }
+            }
+
+            previousRowLastNumber = lastNonZeroInRow;
+        }
+
+        return true;
     }
 
     // Console-based play method
@@ -82,6 +134,7 @@ public class NumberGame extends AbstractNumberGame {
             }
         }
 
+
         // Display game stats
         displayGameStats();
 
@@ -92,6 +145,36 @@ public class NumberGame extends AbstractNumberGame {
 
         if (playAgain.equals("Y")) {
             playGame();
+        }
+    }
+
+    @Override
+    public void updateGameStats(boolean won) {
+        totalGames++;
+        if (won) gamesWon++;
+
+        // Count successful placements
+        int successfulPlacements = 0;
+        for (int[] row : grid) {
+            for (int cell : row) {
+                if (cell != 0) successfulPlacements++;
+            }
+        }
+        totalSuccessfulPlacements += successfulPlacements;
+
+        // Update UI or console stats based on mode
+        if (guiMode && statsLabel != null) {
+            statsLabel.setText(String.format("Games: %d Won, %d Lost | Average Placements: %.2f",
+                    gamesWon, totalGames,
+                    totalGames > 0 ? (double)totalSuccessfulPlacements / totalGames : 0));
+        } else if (!guiMode) {
+            // Console mode stats display can be handled in the playGame method
+            System.out.printf("Game Over - Won: %s\n", won);
+            System.out.printf("Total Games: %d\n", totalGames);
+            System.out.printf("Games Won: %d\n", gamesWon);
+            System.out.printf("Total Successful Placements: %d\n", totalSuccessfulPlacements);
+            System.out.printf("Average Placements per Game: %.2f\n",
+                    totalGames > 0 ? (double)totalSuccessfulPlacements / totalGames : 0);
         }
     }
 
