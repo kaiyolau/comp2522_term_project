@@ -21,7 +21,12 @@ public class NumberGame extends AbstractNumberGame {
     private JLabel statsLabel;
     private boolean guiMode;
 
-    // Console mode constructor
+    /**
+     * Console mode constructor.
+     * Initializes the game in either GUI or console mode based on the provided parameter.
+     *
+     * @param isGuiMode A boolean indicating whether the game should be played in GUI mode or not.
+     */
     public NumberGame(boolean isGuiMode) {
         super();
         this.guiMode = isGuiMode;
@@ -30,11 +35,17 @@ public class NumberGame extends AbstractNumberGame {
         startGame();
     }
 
-    // Default constructor (GUI mode)
+    /**
+     * Default constructor, initializes the game in GUI mode by default.
+     */
     public NumberGame() {
         this(true);
     }
 
+    /**
+     * Starts the game. If the game is in GUI mode, it initializes the graphical interface;
+     * otherwise, it prepares for console-based gameplay.
+     */
     @Override
     public void startGame() {
         if (guiMode) {
@@ -47,6 +58,12 @@ public class NumberGame extends AbstractNumberGame {
         }
     }
 
+    /**
+     * Checks if the game is complete. The game is considered complete if all cells are filled
+     * and the numbers are placed in ascending order across the grid.
+     *
+     * @return true if the game is complete, false otherwise.
+     */
     private boolean isGameComplete() {
         // Check if all cells are filled and in ascending order
         for (int row = 0; row < grid.length; row++) {
@@ -88,7 +105,11 @@ public class NumberGame extends AbstractNumberGame {
         return true;
     }
 
-    // Console-based play method
+    /**
+     * Console-based play method. This method handles gameplay when the game is played in console mode.
+     * It asks the player to enter a row to place the current number and checks if the placement is valid.
+     * If the game is won, a message is displayed, and the player can choose to play again.
+     */
     public void playGame() {
         if (guiMode) {
             // If in GUI mode, just bring the frame to front
@@ -145,7 +166,6 @@ public class NumberGame extends AbstractNumberGame {
             }
         }
 
-
         // Display game stats
         displayGameStats();
 
@@ -159,6 +179,13 @@ public class NumberGame extends AbstractNumberGame {
         }
     }
 
+    /**
+     * Updates the game statistics, including the total number of games played, won,
+     * and the average number of placements per game. This method updates stats in both
+     * GUI mode (if enabled) and console mode.
+     *
+     * @param won A boolean indicating if the current game was won.
+     */
     @Override
     public void updateGameStats(boolean won) {
         totalGames++;
@@ -189,11 +216,17 @@ public class NumberGame extends AbstractNumberGame {
         }
     }
 
+    /**
+     * Resets the game state, clearing the grid and generating the first number.
+     */
     private void resetGame() {
         resetGrid();
         currentNumber = generateNextNumber();
     }
 
+    /**
+     * Prints the current state of the grid to the console.
+     */
     private void printGrid() {
         for (int[] row : grid) {
             for (int cell : row) {
@@ -203,6 +236,11 @@ public class NumberGame extends AbstractNumberGame {
         }
     }
 
+    /**
+     * Places the current number in the first empty spot of the specified row.
+     *
+     * @param row The row in which the number is placed.
+     */
     private void placeNumberInRow(int row) {
         for (int col = 0; col < grid[row].length; col++) {
             if (grid[row][col] == 0) {
@@ -212,6 +250,10 @@ public class NumberGame extends AbstractNumberGame {
         }
     }
 
+    /**
+     * Displays the game statistics to the console, including total games, games won,
+     * total successful placements, and average placements per game.
+     */
     private void displayGameStats() {
         System.out.printf("Game Stats:\n");
         System.out.printf("Total Games: %d\n", totalGames);
@@ -221,9 +263,10 @@ public class NumberGame extends AbstractNumberGame {
                 totalGames > 0 ? (double)totalSuccessfulPlacements / totalGames : 0);
     }
 
-    // Rest of the previous GUI implementation remains the same...
-
-    // Override the GUI-specific methods to do nothing in console mode
+    /**
+     * Initializes the GUI components if the game is being played in GUI mode.
+     * This method does nothing in console mode.
+     */
     private void initializeGUI() {
         // Only initialize if in GUI mode
         if (!guiMode) return;
@@ -231,7 +274,11 @@ public class NumberGame extends AbstractNumberGame {
         // Previous GUI initialization code remains the same
     }
 
-    // Main method for standalone testing
+    /**
+     * The main entry point of the program. It initializes the game in console mode for testing purposes.
+     *
+     * @param args Command-line arguments (not used in this case).
+     */
     public static void main(String[] args) {
         // For testing console mode
         NumberGame game = new NumberGame(false);

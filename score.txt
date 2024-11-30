@@ -54,3 +54,10 @@ Correct Second Attempts: 0
 Incorrect Attempts: 10
 Total Score: 0 points
 
+Date and Time: 2024-11-30 03:07:04
+Games Played: 1
+Correct First Attempts: 0
+Correct Second Attempts: 0
+Incorrect Attempts: 10
+Total Score: 0 points
+
