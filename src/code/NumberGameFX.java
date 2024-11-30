@@ -35,8 +35,8 @@ public class NumberGameFX extends Application {
         GridPane gridPane = new GridPane();
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COLS; col++) {
-                final int currentRow = row; // Declare new final variable
-                final int currentCol = col; // Declare new final variable
+                final int currentRow = row;
+                final int currentCol = col;
                 Button button = new Button();
                 button.setPrefSize(60, 60);
                 button.setOnAction(e -> handleCellClick(currentRow, currentCol, button));
@@ -45,17 +45,21 @@ public class NumberGameFX extends Application {
             }
         }
 
-
-        // Start Game Button
+        // Control buttons
         Button startGameButton = new Button("Start Game");
         startGameButton.setOnAction(e -> startNewGame());
 
-        // Reset Button
-        Button resetButton = new Button("Reset");
-        resetButton.setOnAction(e -> resetGame());
+        Button resetButton = new Button("Try Again");
+        resetButton.setOnAction(e -> startNewGame());
+
+        Button quitButton = new Button("Quit");
+        quitButton.setOnAction(e -> {
+            showAlert("Final Score", getFinalScore());
+            primaryStage.close(); // Close the game window
+        });
 
         // Add to root
-        root.getChildren().addAll(currentNumberLabel, gridPane, startGameButton, resetButton, statsLabel);
+        root.getChildren().addAll(currentNumberLabel, gridPane, startGameButton, resetButton, quitButton, statsLabel);
 
         // Scene and stage setup
         Scene scene = new Scene(root, 400, 500);
@@ -71,12 +75,6 @@ public class NumberGameFX extends Application {
         updateStats();
     }
 
-    private void resetGame() {
-        resetGrid();
-        numberQueue.clear();
-        currentNumberLabel.setText("Game Reset");
-    }
-
     private void resetGrid() {
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COLS; col++) {
@@ -85,10 +83,12 @@ public class NumberGameFX extends Application {
                 buttons[row][col].setDisable(false);
             }
         }
+        successfulPlacements = 0;
     }
 
     private void generateRandomNumbers() {
         Random random = new Random();
+        numberQueue.clear();
         for (int i = 0; i < ROWS * COLS; i++) {
             numberQueue.add(random.nextInt(1000) + 1);
         }
@@ -114,6 +114,7 @@ public class NumberGameFX extends Application {
         if (!isPlacementValid(row, col)) {
             showAlert("Game Over", "Invalid placement! You lost.");
             totalGames++;
+            updateStats();
             return;
         }
 
@@ -129,11 +130,16 @@ public class NumberGameFX extends Application {
     }
 
     private boolean isPlacementValid(int row, int col) {
+        // Ensure the numbers are in ascending order across the grid
+        int previousNumber = 0;
         for (int r = 0; r <= row; r++) {
             for (int c = 0; c < COLS; c++) {
-                if (grid[r][c] > 0 && grid[r][c] > currentNumber) {
+                int current = grid[r][c];
+                if (current == 0) break; // Skip unfilled cells
+                if (current < previousNumber) {
                     return false;
                 }
+                previousNumber = current;
             }
         }
         return true;
@@ -161,6 +167,12 @@ public class NumberGameFX extends Application {
         statsLabel.setText(String.format("Games: %d Played, %d Won | Average Placements: %.2f",
                 totalGames, gamesWon,
                 totalGames > 0 ? (double) successfulPlacements / totalGames : 0));
+    }
+
+    private String getFinalScore() {
+        return String.format("Total Games: %d\nGames Won: %d\nGames Lost: %d\nAverage Placements per Game: %.2f",
+                totalGames, gamesWon, totalGames - gamesWon,
+                totalGames > 0 ? (double) successfulPlacements / totalGames : 0);
     }
 
     public static void main(String[] args) {
