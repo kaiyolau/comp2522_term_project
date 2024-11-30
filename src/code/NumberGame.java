@@ -3,6 +3,17 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+
+/**
+ * Represents the Number Game, which can be played either in GUI mode or console mode.
+ * The goal of the game is to place randomly generated numbers in a 4x5 grid in ascending order.
+ * If a number is placed out of order or there are no valid positions for the current number, the player loses.
+ * <p>
+ * This class extends {@link AbstractNumberGame} and implements the game logic for both GUI and console modes.
+ * </p>
+ * Author: Kyle Lau
+ * Version 1.0
+ */
 public class NumberGame extends AbstractNumberGame {
     private JFrame frame;
     private JButton[][] buttons;

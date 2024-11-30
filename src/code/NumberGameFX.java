@@ -12,6 +12,18 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
 
+
+/**
+ * Represents the GUI-based Number Game using JavaFX.
+ * The goal of the game is to place randomly generated numbers in a 4x5 grid in ascending order.
+ * If a number is placed out of order or there are no valid positions for the current number, the player loses.
+ * <p>
+ * This class uses JavaFX to provide an interactive graphical interface for the game.
+ * It includes a grid of buttons, score tracking, and options to restart or quit the game.
+ * </p>
+ * Author: Kyle Lau
+ * Version 1.0
+ */
 public class NumberGameFX extends Application {
     private static final int ROWS = 4;
     private static final int COLS = 5;
@@ -68,9 +80,27 @@ public class NumberGameFX extends Application {
         primaryStage.show();
     }
 
+    private void printSolution() {
+        // Flatten the grid into a 1D array and sort the random numbers
+        int[] solution = numberQueue.stream().sorted().mapToInt(Integer::intValue).toArray();
+
+        // Display the solution in the console
+        System.out.println("Solution:");
+        int index = 0;
+        for (int row = 0; row < ROWS; row++) {
+            for (int col = 0; col < COLS; col++) {
+                System.out.printf("%4d ", solution[index++]);
+            }
+            System.out.println(); // Move to the next row
+        }
+        System.out.println("Follow this solution to win the game!");
+    }
+
+
     private void startNewGame() {
         resetGrid();
         generateRandomNumbers();
+        printSolution();
         displayNextNumber();
         updateStats();
     }
@@ -162,6 +192,7 @@ public class NumberGameFX extends Application {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
 
     private void updateStats() {
         statsLabel.setText(String.format("Games: %d Played, %d Won | Average Placements: %.2f",
